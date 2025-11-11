@@ -1,6 +1,7 @@
 using Phonetool.Components;
 using Phonetool.Data;
 using Microsoft.EntityFrameworkCore;
+using Phonetool.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,12 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<JobModel>(provider => 
+    new JobModel(provider.GetRequiredService<AppDbContext>()));
+
+builder.Services.AddScoped<PersonModel>(provider => 
+    new PersonModel(provider.GetRequiredService<AppDbContext>()));
 
 var app = builder.Build();
 

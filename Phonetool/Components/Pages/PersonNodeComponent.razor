@@ -1,0 +1,42 @@
+@using Phonetool.Entities
+
+<div class="@GetMarginClass() mb-2">
+    <div class="@GetCardClass()">
+        <div class="card-body p-2">
+            <h6 class="card-title mb-1">@Node.Data.FirstName @Node.Data.LastName</h6>
+            <p class="card-text small mb-1">@Node.Data.JobTitle</p>
+            <span class="@GetBadgeClass()">Level @Node.Data.JobLevel</span>
+        </div>
+    </div>
+
+    @if (Node.Employees.Any())
+    {
+        <div class="mt-2">
+            @foreach (var employee in Node.Employees.OrderByDescending(e => e.Data.JobLevel))
+            {
+                <PersonNodeComponent Node="employee" Level="@(Level + 1)" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public PersonNode Node { get; set; }
+    [Parameter] public int Level { get; set; } = 0;
+
+    private string GetMarginClass() => Level > 0 ? $"ms-{Level * 3}" : "";
+
+    private string GetCardClass() => Level switch
+    {
+        0 => "card border-primary mb-3",
+        1 => "card border-success mb-3",
+        _ => "card border-warning mb-3"
+    };
+
+    private string GetBadgeClass() => Level switch
+    {
+        0 => "badge bg-primary",
+        1 => "badge bg-success",
+        _ => "badge bg-warning"
+    };
+}

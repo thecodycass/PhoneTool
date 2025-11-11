@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Phonetool.Data;
 
@@ -10,9 +11,11 @@ using Phonetool.Data;
 namespace Phonetool.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251111162944_RemoveTenureFromPerson")]
+    partial class RemoveTenureFromPerson
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -66,14 +69,14 @@ namespace Phonetool.Migrations
                     b.Property<bool>("IsManager")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("JobId")
+                    b.Property<int>("JobId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("ManagerId")
+                    b.Property<int>("ManagerId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("PersonId");
@@ -89,11 +92,15 @@ namespace Phonetool.Migrations
                 {
                     b.HasOne("Phonetool.Entities.Job", "Job")
                         .WithMany("Persons")
-                        .HasForeignKey("JobId");
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Phonetool.Entities.Person", "Manager")
                         .WithMany()
-                        .HasForeignKey("ManagerId");
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Job");
 

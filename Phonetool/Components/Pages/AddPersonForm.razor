@@ -1,0 +1,114 @@
+@page "/person/add"
+@inject JobModel JobModel
+@inject PersonModel PersonModel
+@inject NavigationManager NavigationManager
+
+<h3>Add New Person</h3>
+
+<EditForm Model="PersonModel" FormName="personForm" OnValidSubmit="Submit">
+    <DataAnnotationsValidator/>
+    <InputNumber @bind-Value="person.PersonId" hidden/>
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="col-form-label">
+                First Name
+            </div>
+        </div>
+        <div class="col-6">
+            <InputText @bind-Value="person.FirstName" class="form-control"/>
+        </div>
+        <div class="col align-content-center">
+            <ValidationMessage For="() => person.FirstName"/>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="col-form-label">
+                Last Name
+            </div>
+        </div>
+        <div class="col-6">
+            <InputText @bind-Value="person.LastName" class="form-control"/>
+        </div>
+        <div class="col align-content-center">
+            <ValidationMessage For="() => person.LastName"/>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="col-form-label">
+                Age
+            </div>
+        </div>
+        <div class="col-6">
+            <InputNumber @bind-Value="person.Age" class="form-control"/>
+        </div>
+        <div class="col align-content-center">
+            <ValidationMessage For="() => person.Age"/>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="col-form-label">
+                Is Manager
+            </div>
+        </div>
+        <div class="col-6 align-content-center">
+            <InputCheckbox @bind-Value="person.IsManager" class="form-check-input"/>
+        </div>
+        <div class="col align-content-center">
+            <ValidationMessage For="() => person.IsManager"/>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="col-form-label">Job</div>
+        </div>
+        <div class="col-6">
+            <InputSelect @bind-Value="person.JobId" class="form-control" DisplayName="--Select Job--">
+                @foreach (var job in jobs)
+                {
+                    <option value="@job.JobId">@job.Title</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="col-form-label">
+                Manager ID <span class="text-warning-emphasis">(Optional)</span>
+            </div>
+        </div>
+        <div class="col-6">
+            <InputNumber @bind-Value="person.ManagerId" class="form-control" />
+        </div>
+    </div>
+
+    
+    <button type="submit" class="btn btn-success">Submit</button>
+    <a href="/" class="btn btn-primary">Back</a>
+</EditForm>
+
+@code {
+
+    [SupplyParameterFromForm(FormName = "personForm")]
+    private Person person { get; set; } = new Person();
+
+    private List<Job> jobs = new ();
+
+    protected override async Task OnInitializedAsync()
+    {
+        jobs = JobModel.GetJobs();
+    }
+
+    private void Submit()
+    {
+        PersonModel.Add(person);
+        NavigationManager.NavigateTo("/");
+    }
+}

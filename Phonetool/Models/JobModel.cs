@@ -40,4 +40,6 @@ public class JobModel(AppDbContext database)
     
     public Job? GetJobByJobId(int jobId) => database.Jobs.Find(jobId);
     public Job? GetJobByTitle(string title) => database.Jobs.Find(title);
+    
+    public List<Job> GetJobs() => database.Jobs.ToList();
 }

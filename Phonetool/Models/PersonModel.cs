@@ -8,6 +8,9 @@ namespace Phonetool.Models;
  */
 public class PersonModel(AppDbContext database)
 {
+    private const int USER_ID = 7;
+    private const int CEO_LEVEL = 99;
+    
     public void Add(Person person)
     {
         var existingPerson = database.Persons.Find(person.PersonId);
@@ -15,6 +18,7 @@ public class PersonModel(AppDbContext database)
 
         person.DateCreated = DateTime.UtcNow;
         person.DateModified = DateTime.UtcNow;
+        person.IsArchived = false;
 
         database.Persons.Add(person);
         database.SaveChanges();
@@ -32,9 +36,7 @@ public class PersonModel(AppDbContext database)
         
         person.IsArchived = true;
         database.Update(person);
-        database.SaveChanges();     
-        
-        
+        database.SaveChanges();
     }
 
     /**
@@ -48,9 +50,9 @@ public class PersonModel(AppDbContext database)
         userToUpdate.FirstName = person.FirstName;
         userToUpdate.LastName = person.LastName;
         userToUpdate.Age = person.Age;
-        userToUpdate.Tenure = person.Tenure;
         userToUpdate.IsManager = person.IsManager;
         userToUpdate.JobId = person.JobId;
+        if (person.IsManager) userToUpdate.ManagerId = person.ManagerId;
         userToUpdate.ManagerId = person.ManagerId;
         userToUpdate.DateModified = DateTime.UtcNow;
 
@@ -69,5 +71,44 @@ public class PersonModel(AppDbContext database)
     public List<Person> GetEmployeesByManager(int managerId)
     {
         return database.Persons.Where(p => p.ManagerId == managerId).ToList();
+    }
+
+    public List<PersonNode> GetHierarchyTree()
+    {
+        var allPeople = database.Persons
+            .Join(
+                database.Jobs,
+                p => p.JobId,
+                j => j.JobId,
+                (p, j) => new PersonEnriched
+                {
+                    PersonId = p.PersonId,
+                    FirstName = p.FirstName,
+                    LastName = p.LastName,
+                    Age = p.Age,
+                    ManagerId = p.ManagerId,
+                    JobTitle = j.Title,
+                    JobLevel = j.JobLevel,
+                    IsManager = p.IsManager
+                })
+            .ToList();
+
+        // Create nodes for all people
+        var nodes = allPeople.ToDictionary(p => p.PersonId, p => new PersonNode { Data = p });
+
+        // Build the hierarchy
+        foreach (var person in allPeople)
+        {
+            if (person.ManagerId.HasValue && nodes.ContainsKey(person.ManagerId.Value))
+            {
+                nodes[person.ManagerId.Value].Employees.Add(nodes[person.PersonId]);
+            }
+        }
+
+        // Return top-level managers (those with no manager)
+        return nodes.Values
+            .Where(n => !n.Data.ManagerId.HasValue)
+            .OrderByDescending(n => n.Data.JobLevel)
+            .ToList();
     }
 }
