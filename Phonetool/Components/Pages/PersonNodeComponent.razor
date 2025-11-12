@@ -1,5 +1,3 @@
-@using Phonetool.Entities
-
 <div class="@GetMarginClass() mb-2">
     <div class="@GetCardClass()">
         <div class="card-body p-2">
@@ -24,7 +22,7 @@
     [Parameter] public PersonNode Node { get; set; }
     [Parameter] public int Level { get; set; } = 0;
 
-    private string GetMarginClass() => Level > 0 ? $"ms-{Level * 3}" : "";
+    private string GetMarginClass() => Level > 0 ? "ms-3" : "";
 
     private string GetCardClass() => Level switch
     {
